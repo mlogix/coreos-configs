@@ -1,0 +1,57 @@
+variant: fcos
+version: 1.4.0
+passwd:
+  users:
+
+    - name: core
+      ssh_authorized_keys:
+
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDO5wuX3zQeSX5Cvd77M7BCx32KejtL9AR0+1+IIMzVyU3m50hSPMQoXIhTVIlv3vJ/StT777NTsZhQBaEA9fB2tnfjgD5lGdxSLQtMtCntOi4M3qA6WbjUMxZll0ABw1bYsz7yGY3lVrFkxBfp69VDJHjXcM0IJfcZG9WuNBu9k0CsbWFzqBwk7ARz/6geTO4yEie9toCtLOpUtIn5FK+RkkUH/NUnOPTo6d1JaWbSKW+kd3ff9+AwfMjZgiJ9vASNDm1UpEZd7FkIdTNf7lr56Lcwo3/ytuFjAnJmwzWKvBusEj5ZT4aKWjbRzDPrr/319Tsba475wmVwpSxJvqovC+yO6zCFFGSfxwM27NSaG3Ww7RoDpuQ+mjC3A6+5m328Z/OruRNxFny513Ohrso8et9yuix/cz6KDowBQdmYWCMkii4Bq028VInpkRiUPz7J010YpkHUgRUE3V7vZKHe0Kdq8vNGKakhsnGUsPLZHbnCk6w1KEv0U76WXIBLj2E9GQRPKBqVEra5jEdH9UTno6xHc7r1yM0doTg+0Lj4648HWR9zuaHr70L16JKte2Zq8IyFRarNoJ653JbhOH2MJlcnrZJfpjaUhPmNKySsIt4/MhJxZjO0gEQuvfjcfIj2VnU3QdCe1FgjQPtLW4bOv8CPRj+0KoBcoiC8qrTG8w==
+
+storage:
+  disks:
+    - # The name of the primary block device. In virtio-based setups, this is
+      # likely `/dev/vda`. Elsewhere, it's likely `/dev/sda`.
+      device: /dev/vda
+      # We do not want to wipe the partition table since this is the primary
+      # device.
+      wipe_table: false
+      partitions:
+
+      - number: 4
+        label: root
+        # Allocate at least 8 GiB to the rootfs. See NOTE above about this.
+        size_mib: 8192
+        resize: true
+
+      - size_mib: 0
+        # We assign a descriptive label to the partition. This is important
+        # for referring to it in a device-agnostic way in other parts of the
+        # configuration.
+        label: var
+
+  filesystems:
+    - path: /var
+      device: /dev/disk/by-partlabel/var
+      # We can select the filesystem we'd like.
+      format: ext4
+      # Ask Butane to generate a mount unit for us so that this filesystem
+      # gets mounted in the real root.
+      with_mount_unit: true
+
+
+  files:
+    - path: /etc/NetworkManager/system-connections/ens2.nmconnection
+      mode: 0600
+      contents:
+        inline: |
+          [connection]
+          id=ens2
+          type=ethernet
+          interface-name=ens2
+          [ipv4]
+          address1=10.10.10.10/24,10.10.10.1
+          dns=8.8.8.8;
+          dns-search=
+          may-fail=false
+          method=manual
