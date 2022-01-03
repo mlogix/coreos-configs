@@ -29,29 +29,3 @@ storage:
         # for referring to it in a device-agnostic way in other parts of the
         # configuration.
         label: var
-
-  filesystems:
-    - path: /var
-      device: /dev/disk/by-partlabel/var
-      # We can select the filesystem we'd like.
-      format: ext4
-      # Ask Butane to generate a mount unit for us so that this filesystem
-      # gets mounted in the real root.
-      with_mount_unit: true
-
-
-  files:
-    - path: /etc/NetworkManager/system-connections/ens2.nmconnection
-      mode: 0600
-      contents:
-        inline: |
-          [connection]
-          id=ens2
-          type=ethernet
-          interface-name=ens2
-          [ipv4]
-          address1=10.10.10.10/24,10.10.10.1
-          dns=8.8.8.8;
-          dns-search=
-          may-fail=false
-          method=manual
