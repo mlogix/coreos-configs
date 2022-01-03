@@ -21,7 +21,7 @@ storage:
       - number: 4
         label: root
         # Allocate at least 8 GiB to the rootfs. See NOTE above about this.
-        size_mib: 8192
+        size_mib: 81920
         resize: true
 
       - size_mib: 0
