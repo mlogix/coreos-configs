@@ -15,7 +15,7 @@
   "storage": {
     "disks": [
       {
-        "device": "/dev/vda",
+        "device": "/dev/sda",
         "partitions": [
           {
             "label": "root",

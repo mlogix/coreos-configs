@@ -12,7 +12,7 @@ storage:
   disks:
     - # The name of the primary block device. In virtio-based setups, this is
       # likely `/dev/vda`. Elsewhere, it's likely `/dev/sda`.
-      device: /dev/vda
+      device: /dev/sda
       # We do not want to wipe the partition table since this is the primary
       # device.
       wipe_table: false
