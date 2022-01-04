@@ -20,7 +20,7 @@ storage:
 
       - number: 4
         label: root
-        # Allocate at least 8 GiB to the rootfs. See NOTE above about this.
+        # Allocate at least 80 GiB to the rootfs. See NOTE above about this.
         size_mib: 81920
         resize: true
 
@@ -29,3 +29,52 @@ storage:
         # for referring to it in a device-agnostic way in other parts of the
         # configuration.
         label: var
+
+  files:
+    # use nano as default editor
+    - path: /etc/profile.d/nano.sh
+      overwrite: true
+      contents:
+        inline: |
+          #/bin/sh
+          export EDITOR=nano
+
+
+systemd:
+  units:
+    # installing nano as a layered package with rpm-ostree
+    - name: rpm-ostree-install-nano.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Layer nano with rpm-ostree
+        Wants=network-online.target
+        After=network-online.target
+        # We run before `zincati.service` to avoid conflicting rpm-ostree
+        # transactions.
+        Before=zincati.service
+        ConditionPathExists=!/var/lib/%N.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/rpm-ostree install --apply-live --allow-inactive nano
+        ExecStart=/bin/touch /var/lib/%N.stamp
+
+        [Install]
+        WantedBy=multi-user.target
+
+    # Enable Docker Socket via TCP connection
+    - name: docker-tcp.socket
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=2375
+        BindIPv6Only=both
+        Service=docker.service
+
+        [Install]
+        WantedBy=sockets.target

@@ -30,6 +30,29 @@
         ],
         "wipeTable": false
       }
+    ],
+    "files": [
+      {
+        "overwrite": true,
+        "path": "/etc/profile.d/nano.sh",
+        "contents": {
+          "source": "data:,%23%2Fbin%2Fsh%0Aexport%20EDITOR%3Dnano%0A"
+        }
+      }
+    ]
+  },
+  "systemd": {
+    "units": [
+      {
+        "contents": "[Unit]\nDescription=Layer nano with rpm-ostree\nWants=network-online.target\nAfter=network-online.target\n# We run before `zincati.service` to avoid conflicting rpm-ostree\n# transactions.\nBefore=zincati.service\nConditionPathExists=!/var/lib/%N.stamp\n\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/usr/bin/rpm-ostree install --apply-live --allow-inactive nano\nExecStart=/bin/touch /var/lib/%N.stamp\n\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "rpm-ostree-install-nano.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=Docker Socket for the API\n\n[Socket]\nListenStream=2375\nBindIPv6Only=both\nService=docker.service\n\n[Install]\nWantedBy=sockets.target\n",
+        "enabled": true,
+        "name": "docker-tcp.socket"
+      }
     ]
   }
 }
